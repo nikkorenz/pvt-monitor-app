@@ -1,0 +1,126 @@
+swagger: "2.0"
+info:
+  description: This is the swagger file that goes with our server code
+  version: "1.0.0"
+  title: Swagger Rest Article
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+# Paths supported by the server application
+paths:
+  /runs:
+    get:
+      operationId: modules.runs.get_active
+      tags:
+        - Runs
+      summary: Get all active runs
+      description: Get all active runs
+      responses:
+        200:
+          description: Successfully got all active runs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Run'  
+    post:
+      operationId: modules.runs.create
+      tags:
+        - Runs
+      summary: Create a run
+      description: Create a new run
+      parameters:
+        - name: run
+          in: body
+          description: Run to create
+          required: True
+          schema:
+            $ref: '#/definitions/Run'
+      responses:
+        201:
+          description: Successfully created person in list
+
+  /runs/{instanceid}:
+    get:
+      operationId: modules.runs.get_run
+      tags:
+        - Runs
+      summary: Get run given instance id
+      description: Get run given instance id
+      parameters:
+        - name: instanceid
+          in: path
+          description: Instance Id to get from runs
+          type: string
+          required: True
+      responses:
+          200:
+            description: Successfully got run from Runs
+            schema:
+              $ref: '#/definitions/Run'
+    
+    put:
+      operationId: modules.runs.update
+      tags:
+        - Runs
+      summary: Update run
+      description: Update run
+      parameters:
+        - name: instanceid
+          in: path
+          description: Instance Id to update from runs
+          type: string
+          required: True
+        - name: run
+          in: body
+          description: Update run details
+          required: True
+          schema:
+            $ref: '#/definitions/Run'
+      responses:
+          200:
+            description: Successfully updated run from Runs
+            schema:
+              $ref: '#/definitions/Run'
+      
+    delete:
+      operationId: modules.runs.delete
+      tags:
+        - Runs
+      summary: Delete run given instance id
+      description: Delete run given instance id
+      parameters:
+        - name: instanceid
+          in: path
+          description: Instance Id to delete from runs
+          type: string
+          required: True
+      responses:
+          200:
+            description: Successfully deleted run from Runs
+            schema:
+              $ref: '#/definitions/Run'
+
+definitions:
+  Run:
+    type: object
+    required:
+      - instanceid
+    properties:
+      instanceid:
+        type: string
+        description: Instance id
+      status:
+        type: string
+        description: Status of the run
+      files:
+        type: array
+        items:
+          type: string
+        description: Files uploaded for test
+      log:
+        type: string
+        description: Associated log filename with run
