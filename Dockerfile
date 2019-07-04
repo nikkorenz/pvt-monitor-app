@@ -13,4 +13,5 @@ WORKDIR /src/
 
 EXPOSE 5000
 
-ENTRYPOINT ["python", "/src/app.py"]
+ENTRYPOINT [ "tail", "-f", "/dev/null" ]
+#ENTRYPOINT ["python", "/src/app.py"]

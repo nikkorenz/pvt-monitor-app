@@ -110,6 +110,8 @@ definitions:
     required:
       - instanceid
     properties:
+      _id:
+        type: object
       instanceid:
         type: string
         description: Instance id

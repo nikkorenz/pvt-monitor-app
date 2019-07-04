@@ -6,60 +6,50 @@ from datetime import datetime
 
 # 3rd party modules
 from flask import make_response, abort
+from pymongo import MongoClient
+from bson.json_util import dumps
+from flask import jsonify
+import json
 
-# Data to serve with our API
-runs = [
-    {
-        "instanceid": "1a",
-        "status": "Active",
-        "files": ['f1', 'f2', 'f3'],
-        "log": '/somewhere/log.txt',
-        "start-time": "asdsad",
-        "end-time": "asdasd"
-    },
-    {
-        "instanceid": "2b",
-        "status": "Active",
-        "files": ['f1', 'f2', 'f3'],
-        "log": '/somewhere/log.txt',
-        "start-time": "asdsad",
-        "end-time": "asdasd"
-    },
-    {
-        "instanceid": "3c",
-        "status": "Failed",
-        "files": ['f1', 'f2', 'f3'],
-        "log": '/somewhere/log.txt',
-        "start-time": "asdsad",
-        "end-time": "asdasd"
-    },
-]
+client = MongoClient('mongodb://root:example@db:27017')
+runs = client.pvtdb.runs
 
-# Create a handler for our read (GET) doggo
 def get_active():
-    """
-    This function responds to a request for /doggo-info/random
-
-    # Create the list of doggo from our data
-    """
-    active_runs = list(filter(lambda r: r["status"] == 'Active', runs))
-    return active_runs
+    active_runs = list(runs.find({'status': 'Active'}))
+    return json.loads(dumps(active_runs))
 
 def create(run):
-    runs.append(run)
-    return runs
+    run['start-time'] = _get_timestamp()
+    run['update-time'] = ''
+    run['end-time'] = ''
+    result = runs.insert_one(run)
+    if result.inserted_id:
+        return {'ok': True, 'message': 'Create Successful!'}, 201
+    else:
+        return {'ok': False, 'message': 'Create Failed!'}, 404
 
 def get_run(instanceid):
-    return list(filter(lambda r: r["instanceid"] == instanceid, runs))[0]
+    result = runs.find_one({'instanceid': instanceid})
+    if result:
+        return json.loads(dumps(result))
+    else:
+        return {'ok': False, 'message': f'Instance id {instanceid} not found!'}, 404
+
 
 def update(instanceid, run):
-    for i, run in enumerate(runs):
-        if run["instanceid"] == instanceid:
-            runs[i] = run
-    return runs
+    run['update-time'] = _get_timestamp()
+    result = runs.find_one_and_update({'instanceid': instanceid}, {'$set': run})
+    if result:
+        return {'ok': True, 'message': 'Update Successful!'}
+    else:
+        return {'ok': False, 'message': f'Instance id {instanceid} not found!'}, 404
 
 def delete(instanceid):
-    for run in runs:
-        if run["instanceid"] == instanceid:
-            runs.remove(run)
-    return runs
+    result = runs.delete_one({'instanceid': instanceid})
+    if result.deleted_count:
+        return {'ok': True, 'message': 'Delete Successful!'}
+    else:
+        return {'ok': False, 'message': f'Instance id {instanceid} not found!'}, 404
+
+def _get_timestamp():
+    return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))    

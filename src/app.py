@@ -3,7 +3,7 @@ Main module of the server file
 """
 
 # 3rd party moudles
-from flask import render_template
+from flask import render_template, jsonify
 import connexion
 from flask_cors import CORS
 
