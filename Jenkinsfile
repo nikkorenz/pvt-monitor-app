@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        dockerNode(image: 'nginx', connector: '80', dockerHost: 'localhost')
+        sh 'echo "Hello world"'
       }
     }
   }
